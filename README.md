@@ -8,10 +8,7 @@ Can view live (https://kintrest.netlify.app)
 
 <div align="center">
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Site-Kintrest-C0213A?style=for-the-badge)](https://YOUR_USERNAME.github.io/kintrest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-F4A07A?style=for-the-badge)](LICENSE)
-[![Made with Love](https://img.shields.io/badge/Made_with-🍒_&_🍑-C0213A?style=for-the-badge)](#)
-
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Site-kintrest.netlify.app-C0213A?style=for-the-badge)](https://kintrest.netlify.app)
 </div>
 
 ---
