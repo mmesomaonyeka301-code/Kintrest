@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kintrest – Discover & Save Beautiful Ideas</title>
+    <meta name="description"
+        content="Kintrest is your visual discovery platform. Save, share and explore the most beautiful ideas on the web." />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <style>
+        :root {
+            --cherry: #C0213A;
+            --cherry-deep: #8B0F24;
+            --cherry-glow: rgba(192, 33, 58, .18);
+            --peach: #F4A07A;
+            --peach-light: #FDDBC9;
+            --peach-soft: #FFF0E8;
+            --sand: #F2E4D8;
+            --cream: #FFF6F0;
+            --charcoal: #2B1F1F;
+            --muted: #9B7272;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            color: var(--charcoal);
+            overflow-x: hidden;
+        }
+
+        .cursor {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            background: var(--cherry);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: multiply;
+            transition: width .15s, height .15s;
+        }
+
+        .cursor-ring {
+            position: fixed;
+            width: 34px;
+            height: 34px;
+            border: 2px solid var(--peach);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: left .06s, top .06s;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 500;
+            padding: 18px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all .3s;
+        }
+
+        .nav.scrolled {
+            background: rgba(255, 246, 240, .95);
+            backdrop-filter: blur(14px);
+            box-shadow: 0 2px 20px rgba(192, 33, 58, .08);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo-circle {
+            width: 42px;
+            height: 42px;
+            background: var(--cherry);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px var(--cherry-glow);
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            transition: transform .25s;
+        }
+
+        .logo:hover .logo-circle {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .logo-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--cherry);
+        }
+
+        .logo-name span {
+            color: var(--peach);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--charcoal);
+            font-weight: 500;
+            font-size: .9rem;
+            transition: color .2s;
+        }
+
+        .nav-link:hover {
+            color: var(--cherry);
+        }
+
+        .nav-cta {
+            padding: 10px 24px;
+            background: var(--cherry);
+            color: #fff;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: .9rem;
+            box-shadow: 0 4px 14px var(--cherry-glow);
+            transition: all .2s;
+            border: none;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .nav-cta:hover {
+            background: var(--cherry-deep);
+            transform: translateY(-2px);
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 100px 48px 60px;
+            gap: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 60% 60% at 65% 50%, rgba(244, 160, 122, .13), transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-left {
+            flex: 1;
+            max-width: 560px;
+            z-index: 1;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: var(--peach-soft);
+            border: 1px solid var(--peach-light);
+            border-radius: 999px;
+            font-size: .8rem;
+            font-weight: 600;
+            color: var(--cherry);
+            margin-bottom: 24px;
+            animation: fadeUp .6s ease both;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.6rem, 5vw, 3.8rem);
+            font-weight: 700;
+            line-height: 1.12;
+            margin-bottom: 22px;
+            animation: fadeUp .6s .1s ease both;
+        }
+
+        .hero h1 em {
+            color: var(--cherry);
+            font-style: italic;
+        }
+
+        .hero-sub {
+            font-size: 1.05rem;
+            color: var(--muted);
+            line-height: 1.65;
+            max-width: 440px;
+            margin-bottom: 36px;
+            animation: fadeUp .6s .2s ease both;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            animation: fadeUp .6s .3s ease both;
+        }
+
+        .btn-primary {
+            padding: 14px 32px;
+            background: var(--cherry);
+            color: #fff;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: 0 6px 20px var(--cherry-glow);
+            transition: all .22s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn-primary:hover {
+            background: var(--cherry-deep);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(192, 33, 58, .4);
+        }
+
+        .btn-ghost {
+            padding: 14px 32px;
+            background: transparent;
+            color: var(--charcoal);
+            border: 2px solid var(--sand);
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all .22s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--peach);
+            color: var(--cherry);
+            background: var(--peach-soft);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 36px;
+            margin-top: 44px;
+            animation: fadeUp .6s .4s ease both;
+        }
+
+        .stat-n {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--cherry);
+        }
+
+        .stat-l {
+            font-size: .8rem;
+            color: var(--muted);
+        }
+
+        .hero-right {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            align-items: center;
+            animation: fadeUp .7s .2s ease both;
+        }
+
+        .hc {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 28px rgba(43, 31, 31, .1);
+            position: relative;
+        }
+
+        .hc img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .hc1 {
+            grid-row: span 2;
+        }
+
+        .hc3 {
+            grid-row: span 2;
+        }
+
+        .save-pill {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, .92);
+            border-radius: 999px;
+            padding: 5px 14px;
+            font-size: .75rem;
+            font-weight: 700;
+            color: var(--cherry);
+        }
+
+        .trust {
+            padding: 28px 48px;
+            background: #fff;
+            border-top: 1px solid var(--sand);
+            border-bottom: 1px solid var(--sand);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+        }
+
+        .ti {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .85rem;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .ti svg {
+            width: 18px;
+            height: 18px;
+            color: var(--cherry);
+        }
+
+        /* PREVIEW — NO BLUR */
+        .preview-section {
+            padding: 80px 48px;
+            text-align: center;
+        }
+
+        .section-tag {
+            display: inline-block;
+            padding: 5px 16px;
+            background: var(--peach-soft);
+            border-radius: 999px;
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--cherry);
+            margin-bottom: 16px;
+            letter-spacing: .5px;
+        }
+
+        .section-h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .section-sub {
+            font-size: 1rem;
+            color: var(--muted);
+            max-width: 500px;
+            margin: 0 auto 48px;
+        }
+
+        .prev-grid {
+            columns: 4 200px;
+            gap: 14px;
+        }
+
+        .prev-pin {
+            break-inside: avoid;
+            margin-bottom: 14px;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(43, 31, 31, .08);
+            background: #fff;
+            transition: transform .2s, box-shadow .2s;
+            cursor: pointer;
+        }
+
+        .prev-pin:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(192, 33, 58, .12);
+        }
+
+        .prev-pin img {
+            width: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .prev-pin .pi {
+            padding: 10px 12px;
+            background: #fff;
+        }
+
+        .prev-pin .pi p {
+            font-size: .82rem;
+            font-weight: 600;
+        }
+
+        .prev-pin .pi span {
+            font-size: .74rem;
+            color: var(--muted);
+        }
+
+        /* FEATURES */
+        .features-section {
+            padding: 80px 48px;
+            background: #fff;
+        }
+
+        .feat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .feat {
+            padding: 28px;
+            border-radius: 20px;
+            background: var(--cream);
+            border: 1.5px solid var(--sand);
+            transition: all .22s;
+        }
+
+        .feat:hover {
+            border-color: var(--peach);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 36px rgba(192, 33, 58, .08);
+        }
+
+        .feat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: var(--peach-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 1.4rem;
+        }
+
+        .feat-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .feat-desc {
+            font-size: .87rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        /* PRICING */
+        .pricing-section {
+            padding: 80px 48px;
+        }
+
+        .price-cards {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 48px;
+        }
+
+        .pc {
+            background: var(--cream);
+            border: 2px solid var(--sand);
+            border-radius: 24px;
+            padding: 36px;
+            width: 300px;
+            text-align: center;
+            transition: all .2s;
+            position: relative;
+        }
+
+        .pc:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 48px rgba(192, 33, 58, .12);
+        }
+
+        .pc.pop {
+            border-color: var(--cherry);
+            background: linear-gradient(145deg, #fff, var(--peach-soft));
+        }
+
+        .pop-badge {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--cherry);
+            color: #fff;
+            padding: 5px 20px;
+            border-radius: 999px;
+            font-size: .78rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .p-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .p-amt {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--cherry);
+        }
+
+        .p-amt sup {
+            font-size: 1.2rem;
+            vertical-align: super;
+        }
+
+        .p-period {
+            font-size: .82rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .p-naira {
+            font-size: .8rem;
+            color: var(--cherry);
+            font-weight: 700;
+            background: var(--peach-soft);
+            padding: 4px 12px;
+            border-radius: 999px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .p-feats {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 28px;
+        }
+
+        .p-feats li {
+            padding: 8px 0;
+            font-size: .88rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(0, 0, 0, .05);
+        }
+
+        .p-feats li::before {
+            content: '✓';
+            color: var(--cherry);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .p-feats li.no::before {
+            content: '✕';
+            color: var(--muted);
+        }
+
+        .p-feats li.no {
+            color: var(--muted);
+        }
+
+        .pay-btn {
+            width: 100%;
+            padding: 13px;
+            border-radius: 999px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700;
+            font-size: .95rem;
+            cursor: pointer;
+            transition: all .2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+        }
+
+        .pay-btn.outline {
+            background: transparent;
+            border: 2px solid var(--cherry);
+            color: var(--cherry);
+        }
+
+        .pay-btn.outline:hover {
+            background: var(--cherry);
+            color: #fff;
+        }
+
+        .pay-btn.filled {
+            background: var(--cherry);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--cherry-glow);
+        }
+
+        .pay-btn.filled:hover {
+            background: var(--cherry-deep);
+            transform: translateY(-2px);
+        }
+
+        .bank-note {
+            margin-top: 10px;
+            font-size: .74rem;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        /* PAYMENT MODAL */
+        .modal-bg {
+            position: fixed;
+            inset: 0;
+            background: rgba(43, 31, 31, .6);
+            backdrop-filter: blur(8px);
+            z-index: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s;
+        }
+
+        .modal-bg.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .pay-modal {
+            background: #fff;
+            border-radius: 28px;
+            max-width: 460px;
+            width: 95%;
+            box-shadow: 0 24px 80px rgba(43, 31, 31, .2);
+            transform: scale(.94);
+            transition: transform .25s;
+            overflow: hidden;
+        }
+
+        .modal-bg.open .pay-modal {
+            transform: scale(1);
+        }
+
+        .modal-bg.open .auth-modal {
+            transform: scale(1);
+        }
+
+        .pm-head {
+            background: linear-gradient(135deg, var(--cherry), var(--cherry-deep));
+            padding: 28px 32px;
+            color: #fff;
+            position: relative;
+        }
+
+        .pm-head h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+
+        .pm-head p {
+            font-size: .88rem;
+            opacity: .85;
+        }
+
+        .pm-close {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            background: rgba(255, 255, 255, .2);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: #fff;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .15s;
+        }
+
+        .pm-close:hover {
+            background: rgba(255, 255, 255, .35);
+        }
+
+        .pm-body {
+            padding: 28px 32px;
+        }
+
+        .plan-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--peach-soft);
+            border-radius: 999px;
+            font-size: .82rem;
+            font-weight: 700;
+            color: var(--cherry);
+            margin-bottom: 18px;
+        }
+
+        .fi {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--sand);
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .9rem;
+            color: var(--charcoal);
+            outline: none;
+            background: var(--cream);
+            margin-bottom: 14px;
+            transition: all .2s;
+        }
+
+        .fi:focus {
+            border-color: var(--peach);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(244, 160, 122, .15);
+        }
+
+        .bank-info {
+            background: var(--peach-soft);
+            border: 1px solid var(--peach-light);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+        }
+
+        .bank-info h4 {
+            font-weight: 700;
+            color: var(--cherry);
+            margin-bottom: 10px;
+            font-size: .85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bank-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(192, 33, 58, .08);
+            font-size: .83rem;
+        }
+
+        .bank-row:last-child {
+            border: none;
+        }
+
+        .bank-row span:last-child {
+            font-weight: 600;
+            color: var(--charcoal);
+        }
+
+        .bank-row span:first-child {
+            color: var(--muted);
+        }
+
+        .amt-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background: var(--cream);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--sand);
+        }
+
+        .amt-row .lbl {
+            font-size: .85rem;
+            color: var(--muted);
+        }
+
+        .amt-row .amt {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--cherry);
+        }
+
+        .pay-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--cherry);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 16px var(--cherry-glow);
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .pay-submit:hover {
+            background: var(--cherry-deep);
+            transform: translateY(-2px);
+        }
+
+        .pay-submit:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .secured {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 12px;
+            font-size: .77rem;
+            color: var(--muted);
+        }
+
+        /* AUTH MODAL */
+        .auth-modal {
+            background: #fff;
+            border-radius: 28px;
+            padding: 36px;
+            max-width: 420px;
+            width: 95%;
+            box-shadow: 0 24px 80px rgba(43, 31, 31, .2);
+            transform: scale(.94);
+            transition: transform .25s;
+            position: relative;
+        }
+
+        .auth-close {
+            position: absolute;
+            top: 16px;
+            right: 18px;
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: var(--muted);
+            transition: all .15s;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-close:hover {
+            color: var(--cherry);
+            background: var(--sand);
+            transform: rotate(90deg);
+        }
+
+        .auth-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .auth-sub {
+            font-size: .88rem;
+            color: var(--muted);
+            margin-bottom: 22px;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 13px;
+            background: var(--cherry);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all .2s;
+            margin-top: 4px;
+        }
+
+        .auth-btn:hover {
+            background: var(--cherry-deep);
+            transform: translateY(-2px);
+        }
+
+        .auth-switch {
+            text-align: center;
+            font-size: .85rem;
+            color: var(--muted);
+            margin-top: 14px;
+        }
+
+        .auth-switch a {
+            color: var(--cherry);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .divider {
+            text-align: center;
+            color: var(--muted);
+            font-size: .82rem;
+            margin: 14px 0;
+            position: relative;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 42%;
+            height: 1px;
+            background: var(--sand);
+        }
+
+        .divider::before {
+            left: 0;
+        }
+
+        .divider::after {
+            right: 0;
+        }
+
+        footer {
+            background: var(--charcoal);
+            color: #fff;
+            padding: 48px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: space-between;
+        }
+
+        .foot-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--peach);
+            margin-bottom: 10px;
+        }
+
+        .foot-sub {
+            font-size: .85rem;
+            color: rgba(255, 255, 255, .5);
+            max-width: 220px;
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+
+        .foot-col h4 {
+            font-size: .82rem;
+            font-weight: 700;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            color: var(--peach);
+            margin-bottom: 14px;
+        }
+
+        .foot-col a {
+            display: block;
+            font-size: .85rem;
+            color: rgba(255, 255, 255, .55);
+            text-decoration: none;
+            margin-bottom: 8px;
+            transition: color .15s;
+        }
+
+        .foot-col a:hover {
+            color: #fff;
+        }
+
+        .foot-bottom {
+            width: 100%;
+            border-top: 1px solid rgba(255, 255, 255, .1);
+            padding-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: .82rem;
+            color: rgba(255, 255, 255, .4);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .social-links a {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-decoration: none;
+            font-size: .85rem;
+            transition: background .15s;
+        }
+
+        .social-links a:hover {
+            background: var(--cherry);
+        }
+
+        .tw {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: var(--charcoal);
+            color: #fff;
+            padding: 11px 24px;
+            border-radius: 999px;
+            font-size: .87rem;
+            font-weight: 600;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, .2);
+            animation: tIn .3s ease, tOut .3s 2.7s ease both;
+            white-space: nowrap;
+        }
+
+        @keyframes tIn {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes tOut {
+            to {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media(max-width:900px) {
+            .hero {
+                flex-direction: column;
+                padding: 90px 24px 48px;
+            }
+
+            .hero-right {
+                display: none;
+            }
+
+            .nav {
+                padding: 16px 24px;
+            }
+
+            .nav-links .nav-link {
+                display: none;
+            }
+
+            .trust {
+                gap: 20px;
+                padding: 20px 24px;
+            }
+
+            .preview-section,
+            .features-section,
+            .pricing-section {
+                padding: 60px 24px;
+            }
+
+            .prev-grid {
+                columns: 2 160px;
+            }
+
+            .price-cards {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            footer {
+                padding: 36px 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cursor" id="cur"></div>
+    <div class="cursor-ring" id="curRing"></div>
+    <div class="tw" id="tw"></div>
+
+    <nav class="nav" id="mainNav">
+        <a class="logo" href="#">
+            <div class="logo-circle">K</div><span class="logo-name">Kin<span>trest</span></span>
+        </a>
+        <div class="nav-links">
+            <a class="nav-link" href="#features">Features</a>
+            <a class="nav-link" href="#preview">Preview</a>
+            <a class="nav-link" href="#pricing">Pricing</a>
+            <a class="nav-link" href="#" onclick="openLogin();return false;">Log in</a>
+            <button class="nav-cta" onclick="openPay('pro')">Get Started ✦</button>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-left">
+            <div class="eyebrow">✦ Your visual discovery platform</div>
+            <h1>Save ideas that <em>move</em> your soul</h1>
+            <p class="hero-sub">Kintrest is where creativity lives. Discover millions of beautiful images, save your
+                favourites, and build boards that tell your story.</p>
+            <div class="hero-btns">
+                <button class="btn-primary" onclick="openPay('pro')">Start for free →</button>
+                <a class="btn-ghost" href="#preview">See what's inside ✦</a>
+            </div>
+            <div class="hero-stats">
+                <div>
+                    <div class="stat-n">2M+</div>
+                    <div class="stat-l">Ideas saved</div>
+                </div>
+                <div>
+                    <div class="stat-n">80K+</div>
+                    <div class="stat-l">Creators</div>
+                </div>
+                <div>
+                    <div class="stat-n">4.9★</div>
+                    <div class="stat-l">Rated</div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-right">
+            <div class="hc hc1" style="height:340px"><img
+                    src="https://images.unsplash.com/photo-1490750967868-88df5691cc7d?w=400&q=80" style="height:340px"
+                    onerror="this.style.background='linear-gradient(135deg,#FDDBC9,#F4A07A)'" />
+                <div class="save-pill">🌸 Spring</div>
+            </div>
+            <div class="hc" style="height:162px"><img
+                    src="https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=400&q=80"
+                    style="height:162px" />
+                <div class="save-pill">🍓 Food</div>
+            </div>
+            <div class="hc" style="height:162px"><img
+                    src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&q=80"
+                    style="height:162px" />
+                <div class="save-pill">🏡 Home</div>
+            </div>
+            <div class="hc hc3" style="height:340px"><img
+                    src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&q=80"
+                    style="height:340px" />
+                <div class="save-pill">🎨 Art</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="trust">
+        <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>Paystack Secure Payments</div>
+        <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+            </svg>Funds → Moniepoint Account</div>
+        <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+            </svg>Cancel Anytime</div>
+        <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75" />
+            </svg>80,000+ Members</div>
+    </div>
+
+    <!-- PREVIEW — FULLY VISIBLE, NO BLUR -->
+    <section class="preview-section" id="preview">
+        <div class="section-tag">SNEAK PEEK</div>
+        <h2 class="section-h2">A glimpse of what waits inside</h2>
+        <p class="section-sub">Real pins, real images — no blur, no tricks. Subscribe to save, comment and create your
+            own.</p>
+        <div class="prev-grid" id="prevGrid"></div>
+        <div style="margin-top:40px">
+            <button class="btn-primary" onclick="openPay('pro')" style="margin:0 auto;display:inline-flex">Join Kintrest
+                from NGN 8,000/mo →</button>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features-section" id="features">
+        <div style="text-align:center">
+            <div class="section-tag">FEATURES</div>
+            <h2 class="section-h2">Everything you need to discover & create</h2>
+            <p class="section-sub">Packed with tools to save, organise and share beautiful ideas.</p>
+        </div>
+        <div class="feat-grid">
+            <div class="feat">
+                <div class="feat-icon">📌</div>
+                <div class="feat-title">Smart Boards</div>
+                <div class="feat-desc">Organise saved pins into beautiful themed boards. Private, shared or
+                    collaborative.</div>
+            </div>
+            <div class="feat">
+                <div class="feat-icon">🔍</div>
+                <div class="feat-title">Infinite Image Search</div>
+                <div class="feat-desc">Search any topic — get hundreds of real photos instantly, powered by Unsplash's
+                    3M+ library.</div>
+            </div>
+            <div class="feat">
+                <div class="feat-icon">🌸</div>
+                <div class="feat-title">Curated Feeds</div>
+                <div class="feat-desc">Your feed learns what you love. Cherry blossoms today, art deco tomorrow.</div>
+            </div>
+            <div class="feat">
+                <div class="feat-icon">👥</div>
+                <div class="feat-title">Creator Community</div>
+                <div class="feat-desc">Follow creators, collaborate on boards and get inspired every single day.</div>
+            </div>
+            <div class="feat">
+                <div class="feat-icon">📱</div>
+                <div class="feat-title">Works Everywhere</div>
+                <div class="feat-desc">Desktop, tablet, phone — Kintrest is beautiful and fast on every screen.</div>
+            </div>
+            <div class="feat">
+                <div class="feat-icon">💳</div>
+                <div class="feat-title">Secure Nigerian Payments</div>
+                <div class="feat-desc">Pay with card, bank transfer or USSD via Paystack. Funds settle instantly to our
+                    verified Moniepoint business account.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING -->
+    <section class="pricing-section" id="pricing">
+        <div style="text-align:center">
+            <div class="section-tag">PRICING</div>
+            <h2 class="section-h2">Simple, honest pricing</h2>
+            <p class="section-sub">Pay securely via Paystack. Funds settle instantly to our verified
+                <strong>Moniepoint</strong> business account.</p>
+        </div>
+        <div class="price-cards">
+            <div class="pc">
+                <div class="p-name">Free</div>
+                <div class="p-amt"><sup>$</sup>0</div>
+                <div class="p-period">forever</div>
+                <div class="p-naira">NGN 0</div>
+                <ul class="p-feats">
+                    <li>Browse public pins</li>
+                    <li>Save up to 50 pins</li>
+                    <li>3 boards maximum</li>
+                    <li>Basic search</li>
+                    <li class="no">Unlimited saves</li>
+                    <li class="no">HD downloads</li>
+                    <li class="no">Creator tools</li>
+                </ul>
+                <button class="pay-btn outline" onclick="openSignup('free')">Get started free</button>
+            </div>
+            <div class="pc pop">
+                <div class="pop-badge">✦ Most Popular</div>
+                <div class="p-name">Pro</div>
+                <div class="p-amt"><sup>$</sup>4.99</div>
+                <div class="p-period">per month</div>
+                <div class="p-naira">≈ NGN 8,000 / month</div>
+                <ul class="p-feats">
+                    <li>Everything in Free</li>
+                    <li>Unlimited saves & boards</li>
+                    <li>HD image quality</li>
+                    <li>Infinite search results</li>
+                    <li>Download pins</li>
+                    <li>Priority feed</li>
+                    <li class="no">Creator monetisation</li>
+                </ul>
+                <button class="pay-btn filled" onclick="openPay('pro')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                        <line x1="1" y1="10" x2="23" y2="10" />
+                    </svg>
+                    Pay with Paystack
+                </button>
+                <div class="bank-note">🔒 Card · Bank Transfer · USSD</div>
+            </div>
+            <div class="pc">
+                <div class="p-name">Creator</div>
+                <div class="p-amt"><sup>$</sup>12</div>
+                <div class="p-period">per month</div>
+                <div class="p-naira">≈ NGN 19,200 / month</div>
+                <ul class="p-feats">
+                    <li>Everything in Pro</li>
+                    <li>Upload & publish pins</li>
+                    <li>Creator profile page</li>
+                    <li>Analytics dashboard</li>
+                    <li>Monetise your content</li>
+                    <li>Priority support</li>
+                    <li>Early feature access</li>
+                </ul>
+                <button class="pay-btn outline" onclick="openPay('creator')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                        <line x1="1" y1="10" x2="23" y2="10" />
+                    </svg>
+                    Pay with Paystack
+                </button>
+                <div class="bank-note">🔒 Card · Bank Transfer · USSD</div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div>
+            <div class="foot-logo">Kintrest ✦</div>
+            <div class="foot-sub">Your visual world, saved beautifully. Discover, pin, and share ideas that move you.
+            </div>
+            <div class="social-links"><a href="#" title="Twitter">𝕏</a><a href="#" title="Instagram">📷</a><a href="#"
+                    title="TikTok">🎵</a></div>
+        </div>
+        <div class="foot-col">
+            <h4>Product</h4><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="app.html">Open
+                App</a><a href="#">What's New</a>
+        </div>
+        <div class="foot-col">
+            <h4>Company</h4><a href="#">About</a><a href="#">Blog</a><a href="#">Careers</a><a href="#">Press</a>
+        </div>
+        <div class="foot-col">
+            <h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms of Service</a><a href="#">Refund Policy</a>
+        </div>
+        <div class="foot-bottom">
+            <span>© 2025 Kintrest. All rights reserved.</span>
+            <span>🔒 Payments via <strong style="color:var(--peach)">Paystack</strong> · Business account on <strong
+                    style="color:var(--peach)">Moniepoint</strong></span>
+        </div>
+    </footer>
+
+    <!-- PAYMENT MODAL -->
+    <div class="modal-bg" id="payModal" onclick="if(event.target===this)closeModal('payModal')">
+        <div class="pay-modal">
+            <div class="pm-head">
+                <button class="pm-close" onclick="closeModal('payModal')">✕</button>
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+                    <div
+                        style="width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-style:italic;font-size:1.2rem;font-weight:700">
+                        K</div>
+                    <div>
+                        <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:2px">Complete
+                            your order</h2>
+                        <p style="font-size:.82rem;opacity:.8">Kintrest · Secure checkout</p>
+                    </div>
+                </div>
+            </div>
+            <div class="pm-body">
+                <div class="plan-badge" id="planBadge">✦ Pro Plan</div>
+
+                <!-- PROFESSIONAL MERCHANT CARD -->
+                <div
+                    style="background:linear-gradient(135deg,var(--charcoal),#3d2a2a);border-radius:16px;padding:20px 22px;margin-bottom:18px;color:#fff;position:relative;overflow:hidden">
+                    <div
+                        style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:rgba(244,160,122,.08);border-radius:50%">
+                    </div>
+                    <div
+                        style="position:absolute;bottom:-30px;left:-10px;width:80px;height:80px;background:rgba(192,33,58,.1);border-radius:50%">
+                    </div>
+                    <div
+                        style="font-size:.7rem;font-weight:700;letter-spacing:1.5px;opacity:.5;text-transform:uppercase;margin-bottom:12px">
+                        Merchant Details</div>
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                        <div>
+                            <div
+                                style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;margin-bottom:2px">
+                                Kintrest Digital</div>
+                            <div style="font-size:.78rem;opacity:.6;margin-bottom:14px">Visual Discovery Platform</div>
+                            <div
+                                style="font-size:.7rem;font-weight:700;letter-spacing:1px;opacity:.4;text-transform:uppercase;margin-bottom:4px">
+                                Account</div>
+                            <div
+                                style="font-family:'DM Sans',monospace;font-size:1rem;font-weight:600;letter-spacing:3px">
+                                7036 · ·· ·· · 566</div>
+                        </div>
+                        <div style="text-align:right">
+                            <div
+                                style="font-size:.7rem;opacity:.4;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">
+                                Bank</div>
+                            <div style="font-size:.82rem;font-weight:700;color:var(--peach)">Moniepoint</div>
+                            <div style="font-size:.7rem;opacity:.5;margin-top:2px">MFB</div>
+                        </div>
+                    </div>
+                    <div
+                        style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;align-items:center">
+                        <div style="display:flex;align-items:center;gap:6px;font-size:.72rem;opacity:.5">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
+                            PCI-DSS Secured
+                        </div>
+                        <div style="font-size:.7rem;opacity:.4">Settlement via Paystack</div>
+                    </div>
+                </div>
+
+                <input class="fi" type="text" id="payName" placeholder="Your full name" />
+                <input class="fi" type="email" id="payEmail" placeholder="Your email address" />
+                <div class="amt-row">
+                    <div>
+                        <div class="lbl">Amount due today</div>
+                        <div style="font-size:.72rem;color:var(--muted);margin-top:2px">Recurring monthly · Cancel
+                            anytime</div>
+                    </div>
+                    <span class="amt" id="payAmt">NGN 8,000</span>
+                </div>
+                <button class="pay-submit" id="payBtn" onclick="launchPaystack()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                        <line x1="1" y1="10" x2="23" y2="10" />
+                    </svg>
+                    Pay with Paystack
+                </button>
+                <div style="display:flex;justify-content:center;gap:16px;margin-top:14px">
+                    <div style="display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--muted)">🔒 SSL
+                        Encrypted</div>
+                    <div style="display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--muted)">✓ PCI-DSS
+                    </div>
+                    <div style="display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--muted)">🏦
+                        Moniepoint</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTH MODAL -->
+    <div class="modal-bg" id="authModal" onclick="if(event.target===this)closeModal('authModal')">
+        <div class="auth-modal">
+            <button class="auth-close" onclick="closeModal('authModal')">✕</button>
+            <div id="authContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // ── YOUR PAYSTACK CONFIG ──────────────────────────────────────
+        // STEP 1: Sign up at https://dashboard.paystack.com
+        // STEP 2: Go to Settings → API Keys → copy your PUBLIC key
+        // STEP 3: Replace the key below
+        // STEP 4: Go to Settings → Bank Account → add your Moniepoint account
+        //         Paystack will auto-settle funds to it every business day.
+        const PAYSTACK_KEY = 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+
+        const PLANS = {
+            free: { name: 'Free Plan', kobo: 0, label: 'Free' },
+            pro: { name: 'Pro Plan ✦', kobo: 800000, label: 'NGN 8,000 (~$4.99)' },
+            creator: { name: 'Creator Plan', kobo: 1920000, label: 'NGN 19,200 (~$12)' }
+        };
+        let activePlan = 'pro';
+
+        // ── PREVIEW GRID — real photos, ZERO blur ─────────────────────
+        const PREV = [
+            { img: 'https://images.unsplash.com/photo-1490750967868-88df5691cc7d?w=400&q=80', h: 200, title: 'Spring Blossom Mood', by: 'Amara K.' },
+            { img: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=400&q=80', h: 240, title: 'Strawberry Flatlay', by: 'Priya M.' },
+            { img: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&q=80', h: 180, title: 'Cosy Corner Setup', by: 'Sienna R.' },
+            { img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&q=80', h: 260, title: 'Abstract Cherry Art', by: 'Leo V.' },
+            { img: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&q=80', h: 220, title: 'Peachy Wardrobe', by: 'Nadia O.' },
+            { img: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=400&q=80', h: 200, title: 'Amalfi Sunset', by: 'Marco T.' },
+            { img: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&q=80', h: 190, title: 'Botanical Shelfie', by: 'Fern W.' },
+            { img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80', h: 230, title: 'Pressed Flowers DIY', by: 'Clara B.' },
+            { img: 'https://images.unsplash.com/photo-1515688594390-b649af70d282?w=400&q=80', h: 200, title: 'Peach Skin-Care Haul', by: 'Yuki S.' },
+            { img: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&q=80', h: 250, title: 'Golden Hour Drive', by: 'Leo V.' },
+            { img: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80', h: 210, title: 'Candlelit Tables', by: 'Amara K.' },
+            { img: 'https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81?w=400&q=80', h: 230, title: 'Raspberry Layer Cake', by: 'Priya M.' },
+        ];
+        document.getElementById('prevGrid').innerHTML = PREV.map(p => `
+  <div class="prev-pin">
+    <img src="${p.img}" alt="${p.title}" style="height:${p.h}px"/>
+    <div class="pi"><p>${p.title}</p><span>by ${p.by}</span></div>
+  </div>`).join('');
+
+        // ── PAYMENT ───────────────────────────────────────────────────
+        function openPay(plan) {
+            activePlan = plan || 'pro';
+            const p = PLANS[activePlan];
+            document.getElementById('planBadge').textContent = '✦ ' + p.name;
+            document.getElementById('payAmt').textContent = p.label;
+            closeModal('authModal');
+            openModal('payModal');
+        }
+
+        function launchPaystack() {
+            const name = document.getElementById('payName').value.trim();
+            const email = document.getElementById('payEmail').value.trim();
+            if (!name) { toast('⚠️ Please enter your full name'); return; }
+            if (!email || !email.includes('@')) { toast('⚠️ Please enter a valid email'); return; }
+            if (activePlan === 'free') { handleSuccess('FREE-' + Date.now()); return; }
+
+            const plan = PLANS[activePlan];
+            const btn = document.getElementById('payBtn');
+            btn.disabled = true;
+            btn.textContent = 'Opening Paystack…';
+
+            // Demo mode if key not configured
+            if (PAYSTACK_KEY.includes('xxxxxx')) {
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Pay Securely with Paystack';
+                    toast('🧪 Demo mode — simulating payment…');
+                    setTimeout(() => handleSuccess('DEMO-' + Math.random().toString(36).substr(2, 9).toUpperCase()), 1200);
+                }, 1400);
+                return;
+            }
+
+            // Real Paystack popup
+            const handler = PaystackPop.setup({
+                key: PAYSTACK_KEY,
+                email: email,
+                amount: plan.kobo,
+                currency: 'NGN',
+                ref: 'KINT-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6),
+                metadata: {
+                    custom_fields: [
+                        { display_name: 'Customer Name', variable_name: 'name', value: name },
+                        { display_name: 'Plan', variable_name: 'plan', value: plan.name }
+                    ]
+                },
+                callback: (res) => handleSuccess(res.reference),
+                onClose: () => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Pay Securely with Paystack';
+                    toast('Payment window closed.');
+                }
+            });
+            handler.openIframe();
+        }
+
+        function handleSuccess(ref) {
+            closeModal('payModal');
+            toast('🎉 Payment confirmed! Ref: ' + ref);
+            setTimeout(() => window.location.href = 'app.html', 1800);
+        }
+
+        // ── AUTH ──────────────────────────────────────────────────────
+        function openSignup() {
+            document.getElementById('authContent').innerHTML = `
+    <div class="auth-title">Join Kintrest ✦</div>
+    <div class="auth-sub">Create your free account and start discovering.</div>
+    <input class="fi" type="text" placeholder="Full name"/>
+    <input class="fi" type="email" placeholder="Email address"/>
+    <input class="fi" type="password" placeholder="Create password"/>
+    <button class="auth-btn" onclick="doSignup()">Create Free Account →</button>
+    <div class="auth-switch">Already have an account? <a onclick="openLogin()">Log in</a></div>`;
+            openModal('authModal');
+        }
+        function openLogin() {
+            document.getElementById('authContent').innerHTML = `
+    <div class="auth-title">Welcome back 🌸</div>
+    <div class="auth-sub">Log in to your Kintrest account.</div>
+    <input class="fi" type="email" placeholder="Email address"/>
+    <input class="fi" type="password" placeholder="Password"/>
+    <div style="text-align:right;margin-bottom:12px"><a href="#" style="font-size:.82rem;color:var(--cherry);font-weight:600">Forgot password?</a></div>
+    <button class="auth-btn" onclick="doLogin()">Log in →</button>
+    <div class="divider">or</div>
+    <div class="auth-switch">New to Kintrest? <a onclick="closeModal('authModal');openSignup()">Sign up free</a></div>`;
+            openModal('authModal');
+        }
+        function doSignup() { toast('🌸 Account created!'); setTimeout(() => { closeModal('authModal'); window.location.href = 'app.html'; }, 1200); }
+        function doLogin() { toast('Welcome back! 🌸'); setTimeout(() => { closeModal('authModal'); window.location.href = 'app.html'; }, 1200); }
+
+        // ── UTILS ─────────────────────────────────────────────────────
+        function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+        function toast(msg) { const w = document.getElementById('tw'), t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; w.appendChild(t); setTimeout(() => t.remove(), 3100); }
+        window.addEventListener('scroll', () => document.getElementById('mainNav').classList.toggle('scrolled', scrollY > 40));
+        const cur = document.getElementById('cur'), ring = document.getElementById('curRing');
+        document.addEventListener('mousemove', e => { cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px'; setTimeout(() => { ring.style.left = e.clientX + 'px'; ring.style.top = e.clientY + 'px'; }, 55); });
+    </script>
+</body>
+
+</html>

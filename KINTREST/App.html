@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kintrest – Your Feed</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=DM+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --cherry: #C0213A;
+            --cherry-deep: #8B0F24;
+            --cherry-glow: rgba(192, 33, 58, .18);
+            --peach: #F4A07A;
+            --peach-light: #FDDBC9;
+            --peach-soft: #FFF0E8;
+            --sand: #F2E4D8;
+            --cream: #FFF6F0;
+            --charcoal: #2B1F1F;
+            --muted: #9B7272;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            color: var(--charcoal);
+        }
+
+        .cursor {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            background: var(--cherry);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: multiply;
+            transition: width .15s, height .15s;
+        }
+
+        .cursor-ring {
+            position: fixed;
+            width: 34px;
+            height: 34px;
+            border: 2px solid var(--peach);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: left .06s, top .06s;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: rgba(255, 246, 240, .94);
+            backdrop-filter: blur(14px);
+            border-bottom: 1.5px solid var(--sand);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 14px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: var(--cherry);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px var(--cherry-glow);
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            transition: transform .25s;
+        }
+
+        .logo:hover .logo-icon {
+            transform: scale(1.1) rotate(-6deg);
+        }
+
+        .logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: var(--cherry);
+        }
+
+        .logo-text span {
+            color: var(--peach);
+        }
+
+        .nav-pills {
+            display: flex;
+            gap: 4px;
+        }
+
+        .pill {
+            padding: 7px 18px;
+            border-radius: 999px;
+            font-size: .88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .18s;
+            color: var(--muted);
+            background: transparent;
+            border: none;
+        }
+
+        .pill:hover {
+            background: var(--sand);
+            color: var(--cherry);
+        }
+
+        .pill.active {
+            background: var(--cherry);
+            color: #fff;
+            box-shadow: 0 3px 10px var(--cherry-glow);
+        }
+
+        .search-wrap {
+            flex: 1;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .search-wrap input {
+            width: 100%;
+            padding: 10px 18px 10px 44px;
+            border: 1.5px solid var(--sand);
+            border-radius: 999px;
+            background: var(--sand);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .9rem;
+            color: var(--charcoal);
+            outline: none;
+            transition: all .2s;
+        }
+
+        .search-wrap input:focus {
+            border-color: var(--peach);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(244, 160, 122, .2);
+        }
+
+        .search-wrap input::placeholder {
+            color: var(--muted);
+        }
+
+        .si {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        .si svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .search-spinner {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--sand);
+            border-top-color: var(--cherry);
+            border-radius: 50%;
+            animation: spin .6s linear infinite;
+            display: none;
+        }
+
+        .search-spinner.show {
+            display: block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: translateY(-50%) rotate(360deg);
+            }
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--charcoal);
+            transition: all .18s;
+            position: relative;
+        }
+
+        .icon-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .icon-btn:hover {
+            background: var(--sand);
+            color: var(--cherry);
+            transform: scale(1.1);
+        }
+
+        .badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 9px;
+            height: 9px;
+            background: var(--cherry);
+            border-radius: 50%;
+            border: 2px solid var(--cream);
+            animation: pb 2s infinite;
+        }
+
+        @keyframes pb {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.4);
+            }
+        }
+
+        .btn-create {
+            padding: 9px 22px;
+            background: var(--cherry);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .88rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 3px 12px var(--cherry-glow);
+            transition: all .2s;
+        }
+
+        .btn-create:hover {
+            background: var(--cherry-deep);
+            transform: translateY(-2px);
+        }
+
+        .av {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--peach), var(--cherry));
+            border: 2.5px solid var(--peach-light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: .95rem;
+            font-weight: 700;
+            color: #fff;
+            transition: all .2s;
+        }
+
+        .av:hover {
+            transform: scale(1.08);
+        }
+
+        .dropdown {
+            position: absolute;
+            top: calc(100%+10px);
+            right: 0;
+            background: #fff;
+            border: 1.5px solid var(--sand);
+            border-radius: 16px;
+            min-width: 220px;
+            box-shadow: 0 12px 40px rgba(43, 31, 31, .12);
+            opacity: 0;
+            transform: translateY(-10px) scale(.97);
+            pointer-events: none;
+            transition: all .2s;
+            z-index: 300;
+        }
+
+        .dropdown.open {
+            opacity: 1;
+            transform: none;
+            pointer-events: all;
+        }
+
+        .di {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 16px;
+            font-size: .88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background .15s;
+            text-decoration: none;
+            color: var(--charcoal);
+        }
+
+        .di:hover {
+            background: var(--cream);
+        }
+
+        .di svg {
+            width: 17px;
+            height: 17px;
+            color: var(--muted);
+        }
+
+        .dp hr {
+            border: none;
+            border-top: 1px solid var(--sand);
+            margin: 4px 0;
+        }
+
+        .nw,
+        .pw {
+            position: relative;
+        }
+
+        /* SEARCH RESULTS BANNER */
+        .search-banner {
+            padding: 14px 24px;
+            background: var(--peach-soft);
+            border-bottom: 1px solid var(--peach-light);
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-banner.show {
+            display: flex;
+        }
+
+        .search-banner span {
+            font-size: .88rem;
+            font-weight: 600;
+            color: var(--cherry);
+        }
+
+        .search-banner button {
+            padding: 6px 14px;
+            border: 1.5px solid var(--cherry);
+            color: var(--cherry);
+            background: none;
+            border-radius: 999px;
+            font-size: .8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .search-banner button:hover {
+            background: var(--cherry);
+            color: #fff;
+        }
+
+        /* CATEGORY BAR */
+        .cat-bar {
+            display: flex;
+            gap: 8px;
+            padding: 16px 24px 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .cat-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .chip {
+            padding: 8px 18px;
+            border-radius: 999px;
+            border: 1.5px solid var(--sand);
+            background: #fff;
+            font-size: .83rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all .18s;
+            color: var(--charcoal);
+        }
+
+        .chip:hover {
+            border-color: var(--peach);
+            color: var(--cherry);
+        }
+
+        .chip.active {
+            background: var(--charcoal);
+            color: #fff;
+            border-color: var(--charcoal);
+        }
+
+        /* FEED */
+        .feed {
+            columns: 5 190px;
+            gap: 14px;
+            padding: 16px 24px 80px;
+        }
+
+        @media(max-width:1200px) {
+            .feed {
+                columns: 4 180px;
+            }
+        }
+
+        @media(max-width:900px) {
+            .feed {
+                columns: 3 160px;
+            }
+        }
+
+        @media(max-width:580px) {
+            .feed {
+                columns: 2 140px;
+            }
+        }
+
+        .pin {
+            break-inside: avoid;
+            margin-bottom: 14px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 2px 12px rgba(43, 31, 31, .07);
+            cursor: pointer;
+            transition: transform .22s, box-shadow .22s;
+            position: relative;
+            animation: fu .45s ease both;
+        }
+
+        .pin:hover {
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 14px 40px rgba(192, 33, 58, .16);
+        }
+
+        @keyframes fu {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pin-img-wrap {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pin-img-wrap img {
+            width: 100%;
+            display: block;
+            object-fit: cover;
+            transition: transform .3s;
+        }
+
+        .pin:hover .pin-img-wrap img {
+            transform: scale(1.04);
+        }
+
+        .pin-fb {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            display: none;
+        }
+
+        .pin-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px;
+            opacity: 0;
+            transition: opacity .2s;
+            background: linear-gradient(to bottom, transparent 40%, rgba(0, 0, 0, .3));
+        }
+
+        .pin:hover .pin-overlay {
+            opacity: 1;
+        }
+
+        .save-btn {
+            margin-left: auto;
+            padding: 7px 16px;
+            background: var(--cherry);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .save-btn:hover {
+            background: var(--cherry-deep);
+            transform: scale(1.05);
+        }
+
+        .save-btn.saved {
+            background: var(--charcoal);
+        }
+
+        .pa {
+            display: flex;
+            gap: 6px;
+        }
+
+        .pac {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .15s;
+        }
+
+        .pac:hover {
+            transform: scale(1.1);
+            background: #fff;
+        }
+
+        .pac svg {
+            width: 15px;
+            height: 15px;
+            color: var(--charcoal);
+        }
+
+        .pin-body {
+            padding: 10px 12px 12px;
+        }
+
+        .pin-title {
+            font-size: .88rem;
+            font-weight: 600;
+            color: var(--charcoal);
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .pin-auth {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .76rem;
+            color: var(--muted);
+        }
+
+        .pin-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .65rem;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .pin-likes {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: .76rem;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+
+        .pin-likes svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 80px 24px;
+            color: var(--muted);
+        }
+
+        .empty-state .em {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--charcoal);
+            margin-bottom: 8px;
+        }
+
+        /* MODAL */
+        .mb {
+            position: fixed;
+            inset: 0;
+            background: rgba(43, 31, 31, .58);
+            backdrop-filter: blur(7px);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s;
+        }
+
+        .mb.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 24px;
+            max-width: 900px;
+            width: 95%;
+            max-height: 92vh;
+            overflow: auto;
+            box-shadow: 0 24px 80px rgba(43, 31, 31, .2);
+            transform: scale(.94);
+            transition: transform .25s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mb.open .modal,
+        .mb.open .create-modal {
+            transform: scale(1);
+        }
+
+        .m-top {
+            display: flex;
+            min-height: 400px;
+        }
+
+        .m-img {
+            flex: 0 0 48%;
+            background: var(--sand);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 24px 0 0 0;
+            overflow: hidden;
+        }
+
+        .m-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .m-info {
+            flex: 1;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow-y: auto;
+        }
+
+        .m-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.3rem;
+            color: var(--muted);
+            align-self: flex-end;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all .15s;
+        }
+
+        .m-close:hover {
+            color: var(--cherry);
+            background: var(--sand);
+            transform: rotate(90deg);
+        }
+
+        .m-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .m-desc {
+            font-size: .9rem;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .m-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 0;
+            border-top: 1px solid var(--sand);
+        }
+
+        .m-av {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #fff;
+            font-size: .9rem;
+            flex-shrink: 0;
+        }
+
+        .m-follow {
+            margin-left: auto;
+            padding: 7px 18px;
+            border: 1.5px solid var(--cherry);
+            color: var(--cherry);
+            background: none;
+            border-radius: 999px;
+            font-size: .82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .18s;
+        }
+
+        .m-follow:hover,
+        .m-follow.following {
+            background: var(--cherry);
+            color: #fff;
+        }
+
+        .m-save-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .m-save {
+            flex: 1;
+            padding: 11px;
+            background: var(--cherry);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700;
+            font-size: .9rem;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .m-save:hover {
+            background: var(--cherry-deep);
+        }
+
+        .m-share {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1.5px solid var(--sand);
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .18s;
+        }
+
+        .m-share:hover {
+            background: var(--sand);
+        }
+
+        .m-share svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .m-tags {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+        .m-tag {
+            padding: 5px 14px;
+            border-radius: 999px;
+            background: var(--peach-soft);
+            color: var(--cherry);
+            font-size: .78rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all .15s;
+        }
+
+        .m-tag:hover {
+            background: var(--peach-light);
+        }
+
+        .m-unsplash {
+            font-size: .72rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .m-unsplash a {
+            color: var(--cherry);
+        }
+
+        .m-comments {
+            padding: 20px 28px;
+            border-top: 1px solid var(--sand);
+        }
+
+        .m-comments h4 {
+            font-size: .9rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .comment {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .c-av {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: .75rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .c-name {
+            font-size: .82rem;
+            font-weight: 700;
+        }
+
+        .c-text {
+            font-size: .82rem;
+            color: var(--muted);
+            margin-top: 2px;
+            line-height: 1.5;
+        }
+
+        .c-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .c-input {
+            flex: 1;
+            padding: 9px 16px;
+            border: 1.5px solid var(--sand);
+            border-radius: 999px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .85rem;
+            color: var(--charcoal);
+            outline: none;
+            background: var(--cream);
+            transition: all .2s;
+        }
+
+        .c-input:focus {
+            border-color: var(--peach);
+            box-shadow: 0 0 0 3px rgba(244, 160, 122, .18);
+        }
+
+        .c-send {
+            padding: 9px 18px;
+            background: var(--cherry);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: .82rem;
+            cursor: pointer;
+            transition: all .18s;
+        }
+
+        .c-send:hover {
+            background: var(--cherry-deep);
+        }
+
+        /* CREATE MODAL */
+        .create-modal {
+            background: #fff;
+            border-radius: 24px;
+            max-width: 680px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 80px rgba(43, 31, 31, .2);
+            transform: scale(.94);
+            transition: transform .25s;
+            padding: 36px;
+        }
+
+        .cm-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--peach);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s;
+            background: var(--peach-soft);
+            margin-bottom: 18px;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--cherry);
+            background: rgba(192, 33, 58, .04);
+        }
+
+        .fi,
+        .ft,
+        .fs {
+            width: 100%;
+            padding: 11px 16px;
+            border: 1.5px solid var(--sand);
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .9rem;
+            color: var(--charcoal);
+            outline: none;
+            background: var(--cream);
+            transition: all .2s;
+            margin-bottom: 16px;
+        }
+
+        .fi:focus,
+        .ft:focus,
+        .fs:focus {
+            border-color: var(--peach);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(244, 160, 122, .15);
+        }
+
+        .ft {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .frow {
+            display: flex;
+            gap: 14px;
+        }
+
+        .frow>div {
+            flex: 1;
+        }
+
+        .pub-btn {
+            width: 100%;
+            padding: 13px;
+            background: var(--cherry);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 16px var(--cherry-glow);
+            transition: all .2s;
+        }
+
+        .pub-btn:hover {
+            background: var(--cherry-deep);
+            transform: translateY(-2px);
+        }
+
+        /* FAB */
+        .fab {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 56px;
+            height: 56px;
+            background: var(--cherry);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 24px rgba(192, 33, 58, .45);
+            transition: all .2s;
+            z-index: 100;
+        }
+
+        .fab:hover {
+            transform: scale(1.12) rotate(10deg);
+        }
+
+        .fab svg {
+            width: 26px;
+            height: 26px;
+            fill: #fff;
+        }
+
+        /* LOAD MORE */
+        .load-more-wrap {
+            text-align: center;
+            padding: 0 24px 60px;
+        }
+
+        .load-more {
+            padding: 12px 36px;
+            background: #fff;
+            border: 2px solid var(--sand);
+            border-radius: 999px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            font-size: .9rem;
+            cursor: pointer;
+            color: var(--charcoal);
+            transition: all .2s;
+        }
+
+        .load-more:hover {
+            border-color: var(--cherry);
+            color: var(--cherry);
+            transform: translateY(-2px);
+        }
+
+        .load-more:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* TOAST */
+        .tw {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: var(--charcoal);
+            color: #fff;
+            padding: 11px 24px;
+            border-radius: 999px;
+            font-size: .87rem;
+            font-weight: 600;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, .2);
+            animation: tIn .3s ease, tOut .3s 2.5s ease both;
+            white-space: nowrap;
+        }
+
+        @keyframes tIn {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes tOut {
+            to {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+        }
+
+        @media(max-width:700px) {
+            .nav-pills {
+                display: none;
+            }
+
+            .m-top {
+                flex-direction: column;
+            }
+
+            .m-img {
+                min-height: 220px;
+                flex: none;
+                border-radius: 24px 24px 0 0;
+            }
+
+            .frow {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cursor" id="cur"></div>
+    <div class="cursor-ring" id="curRing"></div>
+    <div class="tw" id="tw"></div>
+
+    <nav>
+        <a class="logo" href="index.html">
+            <div class="logo-icon">K</div>
+            <span class="logo-text">Kin<span>trest</span></span>
+        </a>
+        <div class="nav-pills">
+            <button class="pill active" onclick="setTab(this,'home')">Home</button>
+            <button class="pill" onclick="setTab(this,'explore')">Explore</button>
+            <button class="pill" onclick="setTab(this,'following')">Following</button>
+        </div>
+        <div class="search-wrap">
+            <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg></span>
+            <input type="text" id="searchInput" placeholder="Search anything — flowers, food, travel, art…"
+                onkeydown="if(event.key==='Enter')doSearch()" />
+            <div class="search-spinner" id="searchSpinner"></div>
+        </div>
+        <div class="nav-right">
+            <div class="nw">
+                <button class="icon-btn" onclick="toggleDD('ndd')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 01-3.46 0" />
+                    </svg>
+                    <span class="badge" id="nb"></span>
+                </button>
+                <div class="dropdown dp" id="ndd">
+                    <div style="padding:12px 16px;font-weight:700;font-size:.88rem;border-bottom:1px solid var(--sand)">
+                        Notifications</div>
+                    <div class="di">
+                        <div style="width:8px;height:8px;border-radius:50%;background:var(--cherry);flex-shrink:0">
+                        </div><span><strong>Amara</strong> saved your Cherry pin</span>
+                    </div>
+                    <div class="di">
+                        <div style="width:8px;height:8px;border-radius:50%;background:var(--peach);flex-shrink:0"></div>
+                        <span><strong>Lena</strong> started following you</span>
+                    </div>
+                    <div class="di">
+                        <div style="width:8px;height:8px;border-radius:50%;background:var(--peach);flex-shrink:0"></div>
+                        <span><strong>Marco</strong> liked your Travel pin</span>
+                    </div>
+                    <hr />
+                    <div class="di"
+                        onclick="toast('All read ✓');document.getElementById('nb').style.display='none';toggleDD('ndd')">
+                        Mark all as read</div>
+                </div>
+            </div>
+            <button class="icon-btn" onclick="toast('💬 Messages coming soon!')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                </svg>
+            </button>
+            <button class="btn-create" onclick="openCreate()">+ Create</button>
+            <div class="pw" style="position:relative">
+                <div class="av" onclick="toggleDD('pdd')">K</div>
+                <div class="dropdown dp" id="pdd">
+                    <div
+                        style="padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--sand)">
+                        <div
+                            style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--peach),var(--cherry));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff">
+                            K</div>
+                        <div>
+                            <div style="font-weight:700;font-size:.9rem">Kintrest User</div>
+                            <div style="font-size:.78rem;color:var(--muted)">@kintrest_me</div>
+                        </div>
+                    </div>
+                    <a class="di" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>My Profile</a>
+                    <a class="di" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>Saved Boards</a>
+                    <hr />
+                    <a class="di" href="index.html" style="color:var(--cherry)"><svg viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4m7 14l5-5-5-5m5 5H9" />
+                        </svg>Log out</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SEARCH RESULTS BANNER -->
+    <div class="search-banner" id="searchBanner">
+        <span id="searchBannerText">Showing results for "flowers"</span>
+        <button onclick="clearSearch()">✕ Clear search</button>
+    </div>
+
+    <!-- CATEGORY BAR -->
+    <div class="cat-bar" id="catBar">
+        <button class="chip active" onclick="loadCategory(this,'aesthetic beauty')">✦ All</button>
+        <button class="chip" onclick="loadCategory(this,'aesthetic pink')">🌸 Aesthetic</button>
+        <button class="chip" onclick="loadCategory(this,'food photography')">🍓 Food</button>
+        <button class="chip" onclick="loadCategory(this,'home interior decor')">🏡 Home Decor</button>
+        <button class="chip" onclick="loadCategory(this,'fashion style outfit')">👗 Fashion</button>
+        <button class="chip" onclick="loadCategory(this,'abstract art painting')">🎨 Art</button>
+        <button class="chip" onclick="loadCategory(this,'travel landscape')">✈️ Travel</button>
+        <button class="chip" onclick="loadCategory(this,'nature flowers plants')">🌿 Nature</button>
+        <button class="chip" onclick="loadCategory(this,'diy craft handmade')">✂️ DIY</button>
+    </div>
+
+    <div class="feed" id="feed"></div>
+
+    <div class="load-more-wrap" id="loadMoreWrap" style="display:none">
+        <button class="load-more" id="loadMoreBtn" onclick="loadMore()">Load more pins ✦</button>
+    </div>
+
+    <button class="fab" onclick="openCreate()"><svg viewBox="0 0 24 24">
+            <path d="M12 5v14M5 12h14" />
+        </svg></button>
+
+    <!-- PIN MODAL -->
+    <div class="mb" id="pm" onclick="if(event.target===this)closeModal('pm')">
+        <div class="modal">
+            <div class="m-top">
+                <div class="m-img" id="mImg"></div>
+                <div class="m-info">
+                    <button class="m-close" onclick="closeModal('pm')">✕</button>
+                    <div class="m-title" id="mTitle"></div>
+                    <div class="m-desc" id="mDesc"></div>
+                    <div class="m-unsplash" id="mUnsplash"></div>
+                    <div class="m-author">
+                        <div class="m-av" id="mAv"></div>
+                        <div>
+                            <div style="font-weight:700;font-size:.9rem" id="mName"></div>
+                            <div style="font-size:.76rem;color:var(--muted)" id="mSub"></div>
+                        </div>
+                        <button class="m-follow" id="mFollow" onclick="toggleFollow()">Follow</button>
+                    </div>
+                    <div class="m-save-row">
+                        <button class="m-save" id="mSaveBtn" onclick="modalSave()">Save</button>
+                        <button class="m-share" onclick="toast('🔗 Link copied!')"><svg viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="18" cy="5" r="3" />
+                                <circle cx="6" cy="12" r="3" />
+                                <circle cx="18" cy="19" r="3" />
+                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                            </svg></button>
+                    </div>
+                    <div class="m-tags" id="mTags"></div>
+                </div>
+            </div>
+            <div class="m-comments">
+                <h4 id="mCC">Comments</h4>
+                <div id="mCList"></div>
+                <div class="c-input-row">
+                    <div class="av" style="width:32px;height:32px;font-size:.8rem;flex-shrink:0">K</div>
+                    <input class="c-input" id="cInput" placeholder="Add a comment…"
+                        onkeydown="if(event.key==='Enter')postComment()" />
+                    <button class="c-send" onclick="postComment()">Post</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREATE MODAL -->
+    <div class="mb" id="cm" onclick="if(event.target===this)closeModal('cm')">
+        <div class="create-modal">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+                <div class="cm-title">Create a Pin ✦</div>
+                <button class="m-close" onclick="closeModal('cm')">✕</button>
+            </div>
+            <div class="upload-zone" onclick="toast('📁 File picker would open here!')">
+                <div style="font-size:2.4rem;margin-bottom:10px">🖼️</div>
+                <div style="font-size:.88rem;color:var(--muted)"><strong style="color:var(--cherry)">Click to
+                        upload</strong> or drag & drop<br>PNG, JPG, GIF — up to 20MB</div>
+            </div>
+            <label style="font-size:.85rem;font-weight:700;margin-bottom:7px;display:block">Title</label>
+            <input class="fi" id="npt" placeholder="Add a catchy title…" />
+            <label style="font-size:.85rem;font-weight:700;margin-bottom:7px;display:block">Description</label>
+            <textarea class="ft" id="npd" placeholder="Tell people more about this pin…"></textarea>
+            <div class="frow">
+                <div>
+                    <label style="font-size:.85rem;font-weight:700;margin-bottom:7px;display:block">Category</label>
+                    <select class="fs" id="npc">
+                        <option value="aesthetic pink">🌸 Aesthetic</option>
+                        <option value="food photography">🍓 Food</option>
+                        <option value="home interior">🏡 Home Decor</option>
+                        <option value="fashion style">👗 Fashion</option>
+                        <option value="abstract art">🎨 Art</option>
+                        <option value="travel landscape">✈️ Travel</option>
+                        <option value="nature plants">🌿 Nature</option>
+                        <option value="craft handmade">✂️ DIY</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:.85rem;font-weight:700;margin-bottom:7px;display:block">Link
+                        (optional)</label>
+                    <input class="fi" placeholder="https://…" style="margin-bottom:0" />
+                </div>
+            </div>
+            <button class="pub-btn" onclick="publishPin()">Publish Pin 🌸</button>
+        </div>
+    </div>
+
+    <script>
+        // ── UNSPLASH CONFIG ────────────────────────────────────────────
+        // Unsplash free API: 50 requests/hour on demo key
+        // For production: sign up at https://unsplash.com/developers → get your own Access Key
+        const UNSPLASH_KEY = 'Szb9TqE5EoY4FTvYqEP1Tqr2MFBFcvRmIWmzFLTkKSc';
+        const UNSPLASH_BASE = 'https://api.unsplash.com';
+
+        let currentPage = 1;
+        let currentQuery = 'aesthetic beauty';
+        let allPins = [];
+        let saved = new Set();
+        let activePin = null;
+        let loadingMore = false;
+
+        // Author names pool
+        const AUTHORS = ['Amara K.', 'Priya M.', 'Sienna R.', 'Leo V.', 'Nadia O.', 'Marco T.', 'Fern W.', 'Clara B.', 'Yuki S.', 'Kai D.', 'Zuri A.', 'Lena P.'];
+        const COLORS = ['#C0213A', '#F4A07A', '#8B0F24', '#6B9E4A', '#C0213A', '#F4A07A', '#8B0F24', '#C0213A'];
+        const COMMENTS_POOL = [
+            [{ n: 'Lena', c: '#F4A07A', t: 'This is so beautiful! 😍' }, { n: 'Zuri', c: '#C0213A', t: 'Saving this forever!' }],
+            [{ n: 'Kai', c: '#8B0F24', t: 'Love the vibes here! 🌸' }],
+            [],
+            [{ n: 'Amara', c: '#C0213A', t: 'This speaks to my soul 🎨' }, { n: 'Priya', c: '#F4A07A', t: 'Wow wow wow 😭' }],
+            [],
+            [{ n: 'Marco', c: '#C0213A', t: 'On my bucket list ✈️' }],
+        ];
+
+        // ── FETCH FROM UNSPLASH ────────────────────────────────────────
+        async function fetchPhotos(query, page = 1, perPage = 24) {
+            const spinner = document.getElementById('searchSpinner');
+            spinner.classList.add('show');
+            try {
+                const res = await fetch(`${UNSPLASH_BASE}/search/photos?query=${encodeURIComponent(query)}&page=${page}&per_page=${perPage}&orientation=portrait`, {
+                    headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` }
+                });
+                if (!res.ok) throw new Error('API error');
+                const data = await res.json();
+                return data.results || [];
+            } catch (e) {
+                // Fallback to curated Unsplash collection IDs if API fails
+                return getFallbackPins(query, page);
+            } finally {
+                spinner.classList.remove('show');
+            }
+        }
+
+        // Fallback: curated real Unsplash photo IDs by topic
+        function getFallbackPins(query, page) {
+            const q = query.toLowerCase();
+            const pools = {
+                aesthetic: ['photo-1490750967868-88df5691cc7d', 'photo-1515688594390-b649af70d282', 'photo-1596462502278-27bfdc403348', 'photo-1434389677669-e08b4cac3105', 'photo-1490481651871-ab68de25d43d', 'photo-1558618666-fcd25c85cd64', 'photo-1618005182384-a83a8bd57fbe', 'photo-1416879595882-3373a0480b5b'],
+                food: ['photo-1464349095431-e9a21285b5f3', 'photo-1464305795204-6f5bbfc7fb81', 'photo-1556909114-f6e7ad7d3136', 'photo-1565299624946-b28f40a0ae38', 'photo-1482049016688-2d3e1b311543', 'photo-1499028344343-cd173ffc68a9'],
+                home: ['photo-1586023492125-27b2c045efd7', 'photo-1556909114-f6e7ad7d3136', 'photo-1567016432779-094069958ea5', 'photo-1555041469-a586c61ea9bc', 'photo-1493809842364-78817add7ffb'],
+                travel: ['photo-1533105079780-92b9be482077', 'photo-1501854140801-50d01698950b', 'photo-1476514525535-07fb3b4ae5f1', 'photo-1469854523086-cc02fe5d8800', 'photo-1503220317375-aaad61436b1b'],
+                art: ['photo-1618005182384-a83a8bd57fbe', 'photo-1547826039-bfc35e0f1ea8', 'photo-1500099817043-86d46000d58f', 'photo-1561214115-f2f134cc4912'],
+                nature: ['photo-1416879595882-3373a0480b5b', 'photo-1490750967868-88df5691cc7d', 'photo-1501854140801-50d01698950b', 'photo-1441974231531-c6227db76b6e', 'photo-1465146344425-f00d5f5c8f07'],
+                fashion: ['photo-1490481651871-ab68de25d43d', 'photo-1434389677669-e08b4cac3105', 'photo-1596462502278-27bfdc403348', 'photo-1539109136881-3be0616acf4b'],
+                default: ['photo-1490750967868-88df5691cc7d', 'photo-1464349095431-e9a21285b5f3', 'photo-1586023492125-27b2c045efd7', 'photo-1618005182384-a83a8bd57fbe', 'photo-1490481651871-ab68de25d43d', 'photo-1533105079780-92b9be482077', 'photo-1416879595882-3373a0480b5b', 'photo-1558618666-fcd25c85cd64', 'photo-1515688594390-b649af70d282', 'photo-1501854140801-50d01698950b', 'photo-1556909114-f6e7ad7d3136', 'photo-1464305795204-6f5bbfc7fb81']
+            };
+            let pool = pools.default;
+            for (const [k, v] of Object.entries(pools)) { if (q.includes(k)) { pool = v; break; } }
+            const offset = ((page - 1) * 12) % pool.length;
+            return pool.map((id, i) => ({
+                id: id + '-' + i,
+                urls: { regular: `https://images.unsplash.com/${id}?w=500&q=80`, small: `https://images.unsplash.com/${id}?w=300&q=70` },
+                alt_description: query,
+                user: { name: AUTHORS[i % AUTHORS.length], username: AUTHORS[i % AUTHORS.length].toLowerCase().replace(' ', '_') },
+                width: 500, height: [280, 320, 240, 360, 200, 290, 310, 250, 270, 230, 300, 220][i % 12]
+            }));
+        }
+
+        // ── BUILD PINS FROM UNSPLASH RESULTS ──────────────────────────
+        function buildPins(photos, query) {
+            return photos.map((photo, i) => ({
+                id: photo.id || Date.now() + i,
+                img: photo.urls?.regular || photo.urls?.small,
+                h: Math.max(180, Math.min(380, photo.height ? Math.round((photo.height / photo.width) * 200) : 220)),
+                title: photo.alt_description ? capitalize(photo.alt_description) : capitalize(query) + ' ' + (i + 1),
+                desc: `A beautiful ${query} photo by ${photo.user?.name || 'Unknown'} on Unsplash.`,
+                author: photo.user?.name || AUTHORS[i % AUTHORS.length],
+                authorLink: photo.user?.links?.html || '#',
+                ac: COLORS[i % COLORS.length],
+                tags: query.split(' ').slice(0, 3),
+                likes: Math.floor(Math.random() * 3000) + 50,
+                comments: COMMENTS_POOL[i % COMMENTS_POOL.length].map(c => ({ ...c })),
+                unsplashLink: photo.links?.html || null,
+                unsplashUser: photo.user?.name || null,
+            }));
+        }
+
+        function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+        // ── RENDER FEED ────────────────────────────────────────────────
+        function renderFeed(pins, append = false) {
+            const feed = document.getElementById('feed');
+            if (!append) feed.innerHTML = '';
+            if (!pins.length && !append) {
+                feed.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="em">🔍</div><h3>No results found</h3><p>Try searching for something else — flowers, travel, food, art…</p></div>`;
+                document.getElementById('loadMoreWrap').style.display = 'none';
+                return;
+            }
+            const html = pins.map((p, i) => `
+    <div class="pin" style="animation-delay:${(i % 24) * .04}s" onclick="openPin('${p.id}')">
+      <div class="pin-img-wrap" style="height:${p.h}px">
+        <img src="${p.img}" alt="${p.title}" style="height:${p.h}px"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+        <div class="pin-fb" style="height:${p.h}px;background:linear-gradient(135deg,#FDDBC9,#C0213A)">🌸</div>
+        <div class="pin-overlay">
+          <button class="save-btn ${saved.has(p.id) ? 'saved' : ''}" onclick="event.stopPropagation();savePin('${p.id}')">${saved.has(p.id) ? 'Saved ✓' : 'Save'}</button>
+          <div class="pa">
+            <button class="pac" onclick="event.stopPropagation();toast('🔗 Link copied!')" title="Share">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </button>
+            <button class="pac" onclick="event.stopPropagation();toast('📌 Added to board!')" title="Add to board">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="pin-body">
+        <div class="pin-title">${p.title}</div>
+        <div class="pin-auth"><div class="pin-dot" style="background:${p.ac}">${p.author[0]}</div>${p.author}</div>
+        <div class="pin-likes">
+          <svg viewBox="0 0 24 24" fill="${saved.has(p.id) ? 'var(--cherry)' : 'none'}" stroke="var(--cherry)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          ${p.likes.toLocaleString()}
+        </div>
+      </div>
+    </div>`).join('');
+            feed.insertAdjacentHTML('beforeend', html);
+            document.getElementById('loadMoreWrap').style.display = 'block';
+        }
+
+        // ── OPEN PIN ──────────────────────────────────────────────────
+        function openPin(id) {
+            const p = allPins.find(x => String(x.id) === String(id));
+            if (!p) return;
+            activePin = p;
+            const mi = document.getElementById('mImg');
+            mi.innerHTML = `<img src="${p.img}" alt="${p.title}" style="width:100%;height:100%;object-fit:cover"/>`;
+            document.getElementById('mTitle').textContent = p.title;
+            document.getElementById('mDesc').textContent = p.desc;
+            if (p.unsplashLink && p.unsplashUser) {
+                document.getElementById('mUnsplash').innerHTML = `📷 Photo by <a href="${p.unsplashLink}" target="_blank" style="color:var(--cherry)">${p.unsplashUser}</a> on Unsplash`;
+            } else { document.getElementById('mUnsplash').innerHTML = ''; }
+            const av = document.getElementById('mAv');
+            av.textContent = p.author[0]; av.style.background = p.ac;
+            document.getElementById('mName').textContent = p.author;
+            document.getElementById('mSub').textContent = `${Math.floor(Math.random() * 9 + 1)}.${Math.floor(Math.random() * 9)}k followers`;
+            const sb = document.getElementById('mSaveBtn');
+            sb.textContent = saved.has(p.id) ? 'Saved ✓' : 'Save';
+            sb.style.background = saved.has(p.id) ? 'var(--charcoal)' : 'var(--cherry)';
+            document.getElementById('mTags').innerHTML = p.tags.map(t => `<button class="m-tag" onclick="searchTag('${t}')">#${t}</button>`).join('');
+            document.getElementById('mFollow').textContent = 'Follow'; document.getElementById('mFollow').classList.remove('following');
+            renderComments(p);
+            openModal('pm');
+        }
+        function renderComments(p) {
+            document.getElementById('mCList').innerHTML = p.comments.map(c => `
+    <div class="comment"><div class="c-av" style="background:${c.c}">${c.n[0]}</div>
+    <div><div class="c-name">${c.n}</div><div class="c-text">${c.t}</div></div></div>`).join('');
+            document.getElementById('mCC').textContent = `${p.comments.length} Comment${p.comments.length !== 1 ? 's' : ''}`;
+        }
+        function postComment() {
+            const inp = document.getElementById('cInput'), t = inp.value.trim();
+            if (!t || !activePin) return;
+            activePin.comments.push({ n: 'You', c: 'var(--cherry)', t });
+            renderComments(activePin); inp.value = ''; toast('Comment posted! 💬');
+        }
+        function modalSave() {
+            if (!activePin) return;
+            saved.has(activePin.id) ? saved.delete(activePin.id) : saved.add(activePin.id);
+            const sb = document.getElementById('mSaveBtn');
+            sb.textContent = saved.has(activePin.id) ? 'Saved ✓' : 'Save';
+            sb.style.background = saved.has(activePin.id) ? 'var(--charcoal)' : 'var(--cherry)';
+            toast(saved.has(activePin.id) ? 'Pin saved! 📌' : 'Pin removed');
+            renderFeed(allPins);
+        }
+        function savePin(id) {
+            saved.has(id) ? saved.delete(id) : saved.add(id);
+            toast(saved.has(id) ? 'Saved to your board! 📌' : 'Removed from board');
+            // just update that pin card's button
+            document.querySelectorAll('.pin').forEach(el => {
+                if (el.getAttribute('onclick') && el.getAttribute('onclick').includes(id)) {
+                    const btn = el.querySelector('.save-btn');
+                    if (btn) { btn.textContent = saved.has(id) ? 'Saved ✓' : 'Save'; btn.classList.toggle('saved', saved.has(id)); }
+                }
+            });
+        }
+        function toggleFollow() {
+            const b = document.getElementById('mFollow');
+            b.classList.toggle('following');
+            b.textContent = b.classList.contains('following') ? 'Following ✓' : 'Follow';
+            toast(b.classList.contains('following') ? 'Following! 🌸' : 'Unfollowed');
+        }
+
+        // ── SEARCH ────────────────────────────────────────────────────
+        async function doSearch() {
+            const val = document.getElementById('searchInput').value.trim();
+            if (!val) return;
+            currentQuery = val;
+            currentPage = 1;
+            const photos = await fetchPhotos(val, 1, 30);
+            allPins = buildPins(photos, val);
+            renderFeed(allPins);
+            document.getElementById('searchBannerText').textContent = `Showing ${allPins.length}+ results for "${val}"`;
+            document.getElementById('searchBanner').classList.add('show');
+            toast(`🔍 Found ${allPins.length}+ images for "${val}"`);
+        }
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchBanner').classList.remove('show');
+            loadCategory(document.querySelector('.chip.active'), 'aesthetic beauty');
+        }
+        async function searchTag(tag) {
+            closeModal('pm');
+            document.getElementById('searchInput').value = tag;
+            await doSearch();
+        }
+
+        // ── CATEGORIES ────────────────────────────────────────────────
+        async function loadCategory(el, query) {
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            if (el) el.classList.add('active');
+            document.getElementById('searchBanner').classList.remove('show');
+            document.getElementById('searchInput').value = '';
+            currentQuery = query;
+            currentPage = 1;
+            const photos = await fetchPhotos(query, 1, 30);
+            allPins = buildPins(photos, query);
+            renderFeed(allPins);
+        }
+
+        // ── TABS ──────────────────────────────────────────────────────
+        async function setTab(el, tab) {
+            document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            if (tab === 'explore') {
+                const q = ['cherry blossom', 'golden hour', 'minimalist', 'ocean waves', 'city lights'][Math.floor(Math.random() * 5)];
+                const photos = await fetchPhotos(q, 1, 30);
+                allPins = buildPins(photos, q);
+                renderFeed(allPins);
+                toast(`Exploring "${q}" ✦`);
+            } else if (tab === 'following') {
+                const photos = await fetchPhotos('fashion aesthetic', 1, 12);
+                allPins = buildPins(photos, 'fashion aesthetic').slice(0, 6);
+                renderFeed(allPins);
+                toast('Pins from creators you follow 🌸');
+            } else {
+                await loadCategory(document.querySelector('.chip.active'), currentQuery || 'aesthetic beauty');
+            }
+        }
+
+        // ── LOAD MORE ─────────────────────────────────────────────────
+        async function loadMore() {
+            if (loadingMore) return;
+            loadingMore = true;
+            const btn = document.getElementById('loadMoreBtn');
+            btn.disabled = true; btn.textContent = 'Loading…';
+            currentPage++;
+            const photos = await fetchPhotos(currentQuery, currentPage, 24);
+            const newPins = buildPins(photos, currentQuery);
+            allPins = [...allPins, ...newPins];
+            renderFeed(newPins, true);
+            btn.disabled = false; btn.textContent = 'Load more pins ✦';
+            loadingMore = false;
+            toast(`Loaded ${newPins.length} more pins ✦`);
+        }
+
+        // ── CREATE ────────────────────────────────────────────────────
+        function openCreate() { openModal('cm'); }
+        async function publishPin() {
+            const t = document.getElementById('npt').value.trim();
+            if (!t) { toast('⚠️ Please add a title!'); return; }
+            const cat = document.getElementById('npc').value;
+            const photos = await fetchPhotos(cat, 1, 1);
+            const ph = photos[0] || null;
+            const newPin = {
+                id: 'user-' + Date.now(),
+                img: ph ? ph.urls.regular : `https://images.unsplash.com/photo-1490750967868-88df5691cc7d?w=500&q=80`,
+                h: 240,
+                title: t,
+                desc: document.getElementById('npd').value || 'A beautiful new pin.',
+                author: 'You', ac: 'var(--cherry)',
+                tags: cat.split(' ').slice(0, 2),
+                likes: 0, comments: [],
+                unsplashUser: ph?.user?.name || null,
+                unsplashLink: ph?.links?.html || null,
+            };
+            allPins.unshift(newPin);
+            closeModal('cm');
+            document.getElementById('npt').value = '';
+            document.getElementById('npd').value = '';
+            renderFeed(allPins);
+            toast('Pin published! 🌸 It\'s live ✦');
+        }
+
+        // ── MODALS & DROPDOWNS ────────────────────────────────────────
+        function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+        function toggleDD(id) { document.querySelectorAll('.dropdown').forEach(d => { if (d.id !== id) d.classList.remove('open'); }); document.getElementById(id).classList.toggle('open'); }
+        document.addEventListener('click', e => { if (!e.target.closest('.nw') && !e.target.closest('[onclick*="pdd"]')) document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open')); });
+
+        // ── TOAST ─────────────────────────────────────────────────────
+        function toast(msg) { const w = document.getElementById('tw'), t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; w.appendChild(t); setTimeout(() => t.remove(), 2900); }
+
+        // ── CURSOR ────────────────────────────────────────────────────
+        const cur = document.getElementById('cur'), ring = document.getElementById('curRing');
+        document.addEventListener('mousemove', e => { cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px'; setTimeout(() => { ring.style.left = e.clientX + 'px'; ring.style.top = e.clientY + 'px'; }, 55); });
+
+        // ── INIT ──────────────────────────────────────────────────────
+        (async () => { await loadCategory(null, 'aesthetic beauty'); })();
+    </script>
+</body>
+
+</html>
