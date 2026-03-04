@@ -1,6 +1,6 @@
 # Kintrest
 🍒 Kintrest — A visual discovery platform to save, share and explore beautiful ideas. Built with HTML, CSS &amp; JavaScript. Powered by Unsplash &amp; Paystack.
-Can view live (https://kintrest.netlify.app)
+Can view live (https://kintrests.netlify.app)
 
 > **A visual discovery & idea-saving platform** — built with pure HTML, CSS & JavaScript.
 
@@ -8,7 +8,7 @@ Can view live (https://kintrest.netlify.app)
 
 <div align="center">
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Site-kintrest.netlify.app-C0213A?style=for-the-badge)](https://kintrest.netlify.app)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Site-kintrests.netlify.app-C0213A?style=for-the-badge)](https://kintrest.netlify.app)
 </div>
 
 ---
@@ -95,7 +95,7 @@ git push origin main
 6. Wait about 60 seconds, then visit:
 
 ```
-(https://kintrest.netlify.app)
+(https://kintrests.netlify.app)
 ```
 
 ---
