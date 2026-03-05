@@ -1,6 +1,7 @@
 # Kintrest
 🍒 Kintrest — A visual discovery platform to save, share and explore beautiful ideas. Built with HTML, CSS &amp; JavaScript. Powered by Unsplash &amp; Paystack.
 Can view live (https://kintrests.netlify.app)
+[![My GitHub stats](https://github-readme-stats.vercel.app/api?username=Kintrest)](https://github.com/Kintrest)
 
 > **A visual discovery & idea-saving platform** — built with pure HTML, CSS & JavaScript.
 
